@@ -249,7 +249,7 @@ A partir de esto nos surge la siguiente pregunta...
 
 Para esto vamos a ver los 5 sectores con menor salario a lo largo del tiempo. En este caso vamos a hacer uso de la librería `gganimate` que nos permite extender `ggplot` agregando animación a nuestras visualizaciones. Lo más interesante es que basta con agregar 5 líneas de código a lo que veníamos haciendo con `ggplot` y luego con la función `animate` agregamos los parámetros finales como por ejemplo la duración del gif.
 
-```{r animación 5 sectores}
+```{r animación 5 sectores, eval = FALSE}
 
 # filtramos los sectores a analizar
 salario_prom_sector_evol <- salario_prom_depto_letra %>% 
@@ -380,7 +380,7 @@ datos_clae %>% head(10)
 
 Inicialmente podemos hacer uso de los IDs de sectores identificados anteriormente para el diciembre del 2021. Para esta fecha los 5 sectores con menor salario se identifican por las letras: I, P, N, L, R. Usemos esta información para realizar los filtros correspondientes.
 
-```{r análisis por actividad}
+```{r análisis por actividad, fig.dim=c(9,8)}
 # volvemos a cargar el diccionario de clae/letras
 # pero esta vez no limpiamos el dataset
 dicc_clae <- read_csv("https://cdn.produccion.gob.ar/cdn-cep/datos-por-departamento/diccionario_clae2.csv")
@@ -404,17 +404,15 @@ ggplot(salario_prom_actividad_2021,
             hjust = 1.1, 
             fontface = "bold",
             alpha = .6,
-            size = 3) +
+            size = 8) +
   coord_flip() +
   ggtitle("Salario promedio por actividad/clae en diciembre del 2021")+
   labs(x = NULL, y = NULL, fill = "Sector") +
   guides(x = "none") +
-  theme_minimal() +
+  theme_minimal(base_size = 22) +
   theme(
     legend.position = "bottom",
     legend.direction = "vertical",
-    legend.text = element_text(size = 6),
-    legend.key.size = unit(3,'mm'),
     plot.title.position = "plot"
   )
 ```
@@ -441,17 +439,14 @@ ggplot(salario_prom_letra_2021,
                                        accuracy = .1)), 
             hjust = 1.1, 
             fontface = "bold",
-            alpha = .6) +
+            alpha = .6,
+            size = 8) +
   coord_flip() +
   ggtitle("Salario promedio por sector en diciembre del 2021")+
-  labs(x = NULL, y = NULL, fill = "Sector") +
-  guides(x = "none") +
-  theme_minimal() +
+  labs(x = NULL, y = NULL) +
+  guides(x = "none", fill = "none") +
+  theme_minimal(base_size = 22) +
   theme(
-    legend.position = "bottom",
-    legend.direction = "vertical",
-    legend.text = element_text(size = 6),
-    legend.key.size = unit(3,'mm'),
     plot.title.position = "plot"
   )
 
