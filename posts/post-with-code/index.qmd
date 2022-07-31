@@ -249,7 +249,7 @@ A partir de esto nos surge la siguiente pregunta...
 
 Para esto vamos a ver los 5 sectores con menor salario a lo largo del tiempo. En este caso vamos a hacer uso de la librería `gganimate` que nos permite extender `ggplot` agregando animación a nuestras visualizaciones. Lo más interesante es que basta con agregar 5 líneas de código a lo que veníamos haciendo con `ggplot` y luego con la función `animate` agregamos los parámetros finales como por ejemplo la duración del gif.
 
-```{r animación 5 sectores, eval = FALSE}
+```{r animación 5 sectores, eval = TRUE}
 
 # filtramos los sectores a analizar
 salario_prom_sector_evol <- salario_prom_depto_letra %>% 
