@@ -16,7 +16,17 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 Este es el primer post en este blog creado con [quarto](https://quarto.org/) y a modo de prueba voy a realizar un análisis usando las [bases de datos del Ministerio de Desarrollo productivo](https://datos.produccion.gob.ar/dataset/salarios-por-departamento-partido-y-sector-de-actividad). Este análisis se realiza en el contexto de un trabajo práctico para una diplomatura. La idea es revisar aspectos de manipulación de datos, la preparación previa de los datos o, cómo yo le digo, el "amasado" de datos, y de visualización, una de las formas más eficientes (y divertidas) de comunicar y darle vida a los datos. Cabe señalar que no voy a ahondar en detalles técnicos con respecto a funciones.
 
-Para comenzar vamos a cargar las librerias que usaremos a lo largo del documento.
+### Sobre los datos de salario
+
+Los datos corresponden al salario bruto promedio de los asalariados registrados, por sector de actividad (letra) y departamento (de acuerdo al domicilio donde vive la persona trabajadora). En este análisis vamos a considerar el universo de "total de empresas" (sector privado junto con empresas públicas). Estos datos tienen una frecuencia mensual y van desde el 2014 hasta la actualidad.
+
+### Sobre los datos espaciales
+
+Estos datos son de tipo espacial (o georreferenciados) y contienen información sobre todos los departamentos de Argentina. Estos datos fueron otorgados y ya vienen convenientemente procesados para facilitar el análisis. Cruzando estos datos con los de salario podremos observar la distribución en un mapa (para esto vamos a utilizar la libreria `sf`). Pueden descargarse desde [acá](https://drive.google.com/file/d/12mEm__Afzj_kk33DW97p6HSqBOu6rx59/view?usp=sharing).
+
+------------------------------------------------------------------------
+
+Para comenzar vamos a cargar las librerías que usaremos a lo largo del documento.
 
 ```{r librerias}
 library(tidyverse)  # para flujo de trabajo con datos
@@ -28,12 +38,6 @@ library(stringi)    # para manipulación de texto
 library(gganimate)  # para animar gráficas
 library(gifski)     # para renderizar
 ```
-
-## Sobre los datos
-
-Los datos corresponden al salario bruto promedio de los asalariados registrados, por sector de actividad (letra) y departamento (de acuerdo al domicilio donde vive la persona trabajadora). En este análisis vamos a considerar el universo de "total de empresas" (sector privado junto con empresas públicas). Estos datos tienen una frecuencia mensual y van desde el 2014 hasta la actualidad.
-
-------------------------------------------------------------------------
 
 A continuación cargamos los datos necesarios.
 
