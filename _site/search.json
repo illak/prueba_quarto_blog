@@ -46,7 +46,7 @@
     "href": "posts/analisis-salario-arg/index.html",
     "title": "Análisis de datos - Salarios por sector en ARG",
     "section": "",
-    "text": "Este es el primer post en este blog creado con quarto y a modo de prueba voy a realizar un análisis usando las bases de datos del Ministerio de Desarrollo productivo. Este análisis se realiza en el contexto de un trabajo práctico para una diplomatura. La idea es revisar aspectos de manipulación de datos, la preparación previa de los datos o, cómo yo le digo, el “amasado” de datos, y de visualización, una de las formas más eficientes (y divertidas) de comunicar y darle vida a los datos. Cabe señalar que no voy a ahondar en detalles técnicos con respecto a funciones.\nPara comenzar vamos a cargar las librerias que usaremos a lo largo del documento."
+    "text": "Este es el primer post en este blog creado con quarto y a modo de prueba voy a realizar un análisis usando las bases de datos del Ministerio de Desarrollo productivo. Este análisis se realiza en el contexto de un trabajo práctico para una diplomatura. La idea es revisar aspectos de manipulación de datos, la preparación previa de los datos o, cómo yo le digo, el “amasado” de datos, y de visualización, una de las formas más eficientes (y divertidas) de comunicar y darle vida a los datos. Cabe señalar que no voy a ahondar en detalles técnicos con respecto a funciones."
   },
   {
     "objectID": "posts/analisis-salario-arg/index.html#sobre-los-datos",

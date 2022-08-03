@@ -199,7 +199,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 <p>Este es el primer post en este blog creado con <a href="https://quarto.org/">quarto</a> y a modo de prueba voy a realizar un análisis usando las <a href="https://datos.produccion.gob.ar/dataset/salarios-por-departamento-partido-y-sector-de-actividad">bases de datos del Ministerio de Desarrollo productivo</a>. Este análisis se realiza en el contexto de un trabajo práctico para una diplomatura. La idea es revisar aspectos de manipulación de datos, la preparación previa de los datos o, cómo yo le digo, el “amasado” de datos, y de visualización, una de las formas más eficientes (y divertidas) de comunicar y darle vida a los datos. Cabe señalar que no voy a ahondar en detalles técnicos con respecto a funciones.</p>
-<p>Para comenzar vamos a cargar las librerias que usaremos a lo largo del documento.</p>
+<section id="sobre-los-datos-de-salario" class="level3">
+<h3 class="anchored" data-anchor-id="sobre-los-datos-de-salario">Sobre los datos de salario</h3>
+<p>Los datos corresponden al salario bruto promedio de los asalariados registrados, por sector de actividad (letra) y departamento (de acuerdo al domicilio donde vive la persona trabajadora). En este análisis vamos a considerar el universo de “total de empresas” (sector privado junto con empresas públicas). Estos datos tienen una frecuencia mensual y van desde el 2014 hasta la actualidad.</p>
+</section>
+<section id="sobre-los-datos-espaciales" class="level3">
+<h3 class="anchored" data-anchor-id="sobre-los-datos-espaciales">Sobre los datos espaciales</h3>
+<p>Estos datos son de tipo espacial (o georreferenciados) y contienen información sobre todos los departamentos de Argentina. Estos datos fueron otorgados y ya vienen convenientemente procesados para facilitar el análisis. Cruzando estos datos con los de salario podremos observar la distribución en un mapa (para esto vamos a utilizar la libreria <code>sf</code>). Pueden descargarse desde <a href="https://drive.google.com/file/d/12mEm__Afzj_kk33DW97p6HSqBOu6rx59/view?usp=sharing">acá</a>.</p>
+<hr>
+<p>Para comenzar vamos a cargar las librerías que usaremos a lo largo del documento.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)  <span class="co"># para flujo de trabajo con datos</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)         <span class="co"># para trabajar con datos espaciales</span></span>
@@ -210,10 +218,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gganimate)  <span class="co"># para animar gráficas</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gifski)     <span class="co"># para renderizar</span></span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="sobre-los-datos" class="level2">
-<h2 class="anchored" data-anchor-id="sobre-los-datos">Sobre los datos</h2>
-<p>Los datos corresponden al salario bruto promedio de los asalariados registrados, por sector de actividad (letra) y departamento (de acuerdo al domicilio donde vive la persona trabajadora). En este análisis vamos a considerar el universo de “total de empresas” (sector privado junto con empresas públicas). Estos datos tienen una frecuencia mensual y van desde el 2014 hasta la actualidad.</p>
-<hr>
 <p>A continuación cargamos los datos necesarios.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># archivo con información georeferenciada de los departamentos del país (este es un archivo otorgado y procesado para la realización del análisis)</span></span>
