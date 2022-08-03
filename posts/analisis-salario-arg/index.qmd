@@ -89,7 +89,7 @@ salarios_dic_2021 <- salarios_2021 %>%
 summary(salarios_dic_2021$w_mean)
 ```
 
-A continuación vamos a realizar el mapa coroplético de salarios de **diciembre 2021** con la finalidad de responder a la pregunta:
+A continuación vamos a realizar el [mapa coroplético](https://es.wikipedia.org/wiki/Mapa_coropl%C3%A9tico) de salarios de **diciembre 2021** con la finalidad de responder a la pregunta:
 
 ¿Cuáles son los departamentos con mayor salario promedio? 🤔
 
