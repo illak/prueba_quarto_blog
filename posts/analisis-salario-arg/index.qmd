@@ -362,7 +362,7 @@ ggplot(salario_sector_evol, aes(x = salario_promedio_K,
   )
 ```
 
-De la visualización podemos ver que el crecimiento fue mayor en sectores con salarios altos.
+De la visualización podemos ver que el crecimiento fue mayor en sectores que ya contaban con salarios altos, entre los cuales podemos listar al sector de *minería*, de *suministro de servicios*, de *intermediación financiera* y de *informática y comunicaciones*.
 
 ## Actualización
 
