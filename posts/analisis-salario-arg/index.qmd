@@ -66,7 +66,9 @@ ggplot(data_deptos_ARG) +
   theme_void()
 ```
 
-Perfecto!, ahora comencemos con un poco de EDA. Veamos los datos de salarios para un año en particular
+## EDA
+
+Perfecto!, ahora comencemos con un poco de EDA (*Exploratory Data Analysis* o *Análisis Exploratorio de los Datos*). Veamos los datos de salarios para un año en particular
 
 ```{r mini EDA}
 # vamos a observar únicamente el año 2021
@@ -87,7 +89,65 @@ salarios_dic_2021 <- salarios_2021 %>%
 
 # observamos el resumen de w_mean para ver que no hayan casos raros
 summary(salarios_dic_2021$w_mean)
+
+
+# comparemos los datasets en cuanto a departamentos
+df1 <- salario_prom_depto %>% 
+  select(codigo_departamento_indec, id_provincia_indec)
+
+df2 <- data_deptos_ARG %>% 
+  select(codigo_departamento_indec, codpcia) %>% 
+  mutate(
+    codigo_departamento_indec = as.numeric(codigo_departamento_indec),
+    codpcia = as.numeric(codpcia)) %>% 
+  rename(id_provincia_indec = codpcia) %>% 
+  st_drop_geometry()
+
+# ¿Qué departamentos están en la base de datos de salarios pero no
+# en la de departamentos?
+diferencia <- setdiff(df1, df2)
+diferencia %>% 
+  left_join(dicc_deptos)
+
+# Particularmente nos interesa que CABA esté icluida en el mapa
+# por lo que vamos a corregir esto. Veamos si efectivamente no aparece CABA en nuestro dataset de departamentos.
+df2 %>% 
+  left_join(dicc_deptos, by = "id_provincia_indec") %>% 
+  filter(id_provincia_indec == 2)
+
+# Podemos ver que sí aparece pero los códigos de departamento
+# hacen referencia a las comunas de CABA. 
+# Estos códigos no figuran en nuestro dataset de salarios. 
+# En el dataset de salarios tenemos el id 2000 que hace 
+# referencia a CABA.
+# Entonces combinemos los polígonos de las comunas en un
+# único polígono para CABA
+
+caba_fix <- data_deptos_ARG %>%
+  select(departamen, provincia, geometry, codigo_departamento_indec) %>%
+  group_by(provincia) %>%
+  filter(provincia == "Ciudad Autónoma de Buenos Aires") %>%
+  summarize(geometry = st_union(geometry),
+            codigo_departamento_indec = "02000") %>%
+  ungroup() %>% 
+  mutate(geometry = st_combine(geometry))
+
+# veamos si efectivamente se unificaron las comunas
+ggplot(caba_fix) +
+  geom_sf()
+
+# perfecto! ahora procedamos a corregir nuestro dataset de
+# departamentos
+sin_CABA <- filter(data_deptos_ARG, provincia != "Ciudad Autónoma de Buenos Aires")
+
+# el "nuevo" dataset pero con id 2000 para CABA
+data_deptos_ARG <- sin_CABA %>%
+  bind_rows(caba_fix) 
+
+glimpse(data_deptos_ARG %>% filter(codigo_departamento_indec=="02000"))
 ```
+
+## Análisis + visualización
 
 A continuación vamos a realizar el [mapa coroplético](https://es.wikipedia.org/wiki/Mapa_coropl%C3%A9tico) de salarios de **diciembre 2021** con la finalidad de responder a la pregunta:
 
@@ -280,6 +340,7 @@ anim <- ggplot(salario_prom_sector_evol) +
             hjust = 0,
             size = 3,
             family = "robo") +
+  scale_fill_brewer(palette = "Set2") +
   coord_flip(clip="off") +
   guides(fill = "none") +
   labs(y = "Salario Promedio") +
@@ -350,7 +411,7 @@ ggplot(salario_sector_evol, aes(x = salario_promedio_K,
             size = 7,
             show.legend = FALSE) +
   scale_x_continuous(limits = c(0,220), expand = c(.2,0)) +
-  scale_color_manual(values = c("#8C826D","#D9AF5B")) +
+  scale_color_manual(values = c("#0E419E","#EB5A49")) +
   labs(x = NULL, y = NULL, color = "Año") +
   theme_minimal(base_family = "robo", base_size = 20) +
   theme(
@@ -409,6 +470,7 @@ ggplot(salario_prom_actividad_2021,
             fontface = "bold",
             alpha = .6,
             size = 8) +
+  scale_fill_brewer(palette = "Set2") +
   coord_flip() +
   ggtitle("Salario promedio por actividad/clae en diciembre del 2021")+
   labs(x = NULL, y = NULL, fill = "Sector") +
@@ -445,6 +507,7 @@ ggplot(salario_prom_letra_2021,
             fontface = "bold",
             alpha = .6,
             size = 8) +
+  scale_fill_brewer(palette = "Set2") +
   coord_flip() +
   ggtitle("Salario promedio por sector en diciembre del 2021")+
   labs(x = NULL, y = NULL) +
