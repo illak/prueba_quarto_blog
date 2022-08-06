@@ -153,7 +153,7 @@ A continuación vamos a realizar el [mapa coroplético](https://es.wikipedia.org
 
 ¿Cuáles son los departamentos con mayor salario promedio? 🤔
 
-```{r distribución dic 2021}
+```{r distribución dic 2021, fig.width= 6, fig.height = 10}
 # primero revisamos que la clave para el join tiene el mismo tipo en ambos DF
 typeof(data_deptos_ARG$codigo_departamento_indec)
 typeof(salarios_dic_2021$codigo_departamento_indec)
@@ -174,7 +174,11 @@ ggplot(deptos_salario_dic_2021) +
   # usamos la paleta de colores viridis cuya principal
   # característica es la accesibilidad
   scale_fill_viridis_c(option = "viridis") +
-  theme_void()
+  theme_void() +
+  theme(
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 13)
+  )
 ```
 
 Como se puede observar en el mapa, el salario promedio es mayor en el sur del país (o la Patagonia Argentina).
@@ -183,7 +187,7 @@ Pero... ¿esta distribución siempre fue así? 🤔
 
 Veamos la distribución del salario promedio pero para el 2014
 
-```{r distribución dic 2014}
+```{r distribución dic 2014, fig.width= 6, fig.height = 10}
 salarios_dic_2014 <- salario_prom_depto %>% 
   filter(year(fecha)==2014) %>% 
   # filtramos los casos -99 y nos quedamos con el mes de diciembre
@@ -198,14 +202,18 @@ ggplot(deptos_salario_dic_2014) +
   geom_sf(aes(fill = w_mean)) +
   labs(fill = "Salario promedio") +
   scale_fill_viridis_c(option = "viridis") +
-  theme_void()
+  theme_void() +
+  theme(
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 13)
+  )
 ```
 
 Podemos observar que la distribución es similar, observando un leve pero distinguible aumento en el salario promedio a nivel territorial en el centro y este del país, además de un incremento en el rango de salarios mínimo y máximo.
 
 A continuación vamos a ver la evolución del promedio del salario en cada departamento. Para esto vamos a analizar los mismos puntos temporales de antes: **diciembre del 2014** y **diciembre del 2021**.
 
-```{r crecimiento histórico porcentaje}
+```{r crecimiento histórico porcentaje, fig.width= 6, fig.height = 10}
 # preparamos los datos
 data_salarios_2014_2021 <- salario_prom_depto %>% 
   filter(fecha == "2014-12-01" | fecha == "2021-12-01") %>% 
@@ -233,7 +241,10 @@ ggplot(deptos_salario_diff) +
   scale_fill_viridis_c(option = "viridis") +
   theme_void() +
   theme(
-    plot.title.position = "plot"
+    plot.title.position = "plot",
+    legend.title = element_text(size = 13),
+    legend.text = element_text(size = 12)
+    
   )
 
 ```

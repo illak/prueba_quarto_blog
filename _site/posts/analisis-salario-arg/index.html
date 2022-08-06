@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.0.37">
+<meta name="generator" content="quarto-1.0.38">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -265,7 +265,7 @@ gtag('config', 'G-X9HYS83D1C', { 'anonymize_ip': true});
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(salarios_2021)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 x 4
+<pre><code># A tibble: 6 × 4
   fecha      codigo_departamento_indec id_provincia_indec  w_mean
   &lt;date&gt;                         &lt;dbl&gt;              &lt;dbl&gt;   &lt;dbl&gt;
 1 2021-01-01                      2000                  2 121888.
@@ -288,7 +288,7 @@ gtag('config', 'G-X9HYS83D1C', { 'anonymize_ip': true});
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(salarios_dic_2021<span class="sc">$</span>w_mean)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-  70443  112318  132916  137557  151941  357702 </code></pre>
+  70443  112318  132916  137556  151941  357702 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># comparemos los datasets en cuanto a departamentos</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> salario_prom_depto <span class="sc">%&gt;%</span> </span>
@@ -308,14 +308,14 @@ gtag('config', 'G-X9HYS83D1C', { 'anonymize_ip': true});
 <span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>diferencia <span class="sc">%&gt;%</span> </span>
 <span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(dicc_deptos)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 4 x 4
-  codigo_departamento_indec id_provincia_indec nombre_departamento_indec nombr~1
+<pre><code># A tibble: 4 × 4
+  codigo_departamento_indec id_provincia_indec nombre_departamento_indec nombr…¹
                       &lt;dbl&gt;              &lt;dbl&gt; &lt;chr&gt;                     &lt;chr&gt;  
 1                      2000                  2 CABA                      CABA   
-2                     94007                 94 Río Grande/Tolhuin        Tierra~
-3                     94014                 94 Ushuaia                   Tierra~
+2                     94007                 94 Río Grande/Tolhuin        Tierra…
+3                     94014                 94 Ushuaia                   Tierra…
 4                        NA                 NA &lt;NA&gt;                      &lt;NA&gt;   
-# ... with abbreviated variable name 1: nombre_provincia_indec</code></pre>
+# … with abbreviated variable name ¹​nombre_provincia_indec</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Particularmente nos interesa que CABA esté icluida en el mapa</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co"># por lo que vamos a corregir esto. Veamos si efectivamente no aparece CABA en nuestro dataset de departamentos.</span></span>
@@ -323,8 +323,8 @@ gtag('config', 'G-X9HYS83D1C', { 'anonymize_ip': true});
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(dicc_deptos, <span class="at">by =</span> <span class="st">"id_provincia_indec"</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(id_provincia_indec <span class="sc">==</span> <span class="dv">2</span>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 15 x 5
-   codigo_departamento_indec.x id_provincia_indec codigo_depar~1 nombr~2 nombr~3
+<pre><code># A tibble: 15 × 5
+   codigo_departamento_indec.x id_provincia_indec codigo_depar…¹ nombr…² nombr…³
                          &lt;dbl&gt;              &lt;dbl&gt;          &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;  
  1                        2001                  2           2000 CABA    CABA   
  2                        2002                  2           2000 CABA    CABA   
@@ -341,8 +341,8 @@ gtag('config', 'G-X9HYS83D1C', { 'anonymize_ip': true});
 13                        2013                  2           2000 CABA    CABA   
 14                        2014                  2           2000 CABA    CABA   
 15                        2015                  2           2000 CABA    CABA   
-# ... with abbreviated variable names 1: codigo_departamento_indec.y,
-#   2: nombre_departamento_indec, 3: nombre_provincia_indec</code></pre>
+# … with abbreviated variable names ¹​codigo_departamento_indec.y,
+#   ²​nombre_departamento_indec, ³​nombre_provincia_indec</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Podemos ver que sí aparece pero los códigos de departamento</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># hacen referencia a las comunas de CABA. </span></span>
@@ -427,9 +427,13 @@ $ geometry                  &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((-58.39102 
 <span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># usamos la paleta de colores viridis cuya principal</span></span>
 <span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># característica es la accesibilidad</span></span>
 <span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="at">option =</span> <span class="st">"viridis"</span>) <span class="sc">+</span></span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>() <span class="sc">+</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>),</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">13</span>)</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/distribución%20dic%202021-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/distribución%20dic%202021-1.png" class="img-fluid" width="576"></p>
 </div>
 </div>
 <p>Como se puede observar en el mapa, el salario promedio es mayor en el sur del país (o la Patagonia Argentina).</p>
@@ -450,9 +454,13 @@ $ geometry                  &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((-58.39102 
 <span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">fill =</span> w_mean)) <span class="sc">+</span></span>
 <span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">fill =</span> <span class="st">"Salario promedio"</span>) <span class="sc">+</span></span>
 <span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="at">option =</span> <span class="st">"viridis"</span>) <span class="sc">+</span></span>
-<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>() <span class="sc">+</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>),</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">13</span>)</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/distribución%20dic%202014-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/distribución%20dic%202014-1.png" class="img-fluid" width="576"></p>
 </div>
 </div>
 <p>Podemos observar que la distribución es similar, observando un leve pero distinguible aumento en el salario promedio a nivel territorial en el centro y este del país, además de un incremento en el rango de salarios mínimo y máximo.</p>
@@ -485,10 +493,13 @@ $ geometry                  &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((-58.39102 
 <span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="at">option =</span> <span class="st">"viridis"</span>) <span class="sc">+</span></span>
 <span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>() <span class="sc">+</span></span>
 <span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
-<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title.position =</span> <span class="st">"plot"</span></span>
-<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title.position =</span> <span class="st">"plot"</span>,</span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">13</span>),</span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>)</span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/crecimiento%20histórico%20porcentaje-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/crecimiento%20histórico%20porcentaje-1.png" class="img-fluid" width="576"></p>
 </div>
 </div>
 <p>Este mapa muestra la evolución en porcentaje del crecimiento de salario en cada departamento. Una posible lectura de este mapa es que el crecimiento del salario promedio se dio de forma semi uniforme con algunas excepciones.</p>
@@ -687,7 +698,7 @@ $ geometry                  &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((-58.39102 
 </div>
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>datos_clae <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">10</span>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 10 x 5
+<pre><code># A tibble: 10 × 5
    fecha      codigo_departamento_indec id_provincia_indec clae2 w_mean
    &lt;date&gt;                         &lt;dbl&gt;              &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
  1 2014-01-01                      2000                  2     1 13085.
