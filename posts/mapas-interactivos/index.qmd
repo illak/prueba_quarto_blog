@@ -1,0 +1,241 @@
+---
+title: "Generar mapas interactivos"
+lang: es
+author: "Zapata Illak"
+date: "2022-09-17"
+categories: [análisis, R, código, plotly, interactivo]
+language: 
+  title-block-author-single: "Autor"
+  title-block-published: "Fecha"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+```{r librerias}
+library(tidyverse)  # para flujo de trabajo con datos
+library(sf)         # para trabajar con datos espaciales
+library(lubridate)  # para trabajar con fechas
+library(scales)     # para formatos varios
+library(showtext)   # para cambiar las fuentes del texto
+library(plotly)     # para mapas interactivos
+```
+
+Este post se basa en los datos introducidos [en este otro post](https://illak-blog.netlify.app/posts/analisis-salario-arg/){target="_blank"}. El objetivo será generar un mapa interactivo con la librería `plotly`.
+
+Vamos con la configuración inicial.
+
+```{r datos}
+# salario promedio depto (total empresas)
+salario_prom_depto <- read_csv("https://cdn.produccion.gob.ar/cdn-cep/datos-por-departamento/salarios/w_mean_depto_tot_emp.csv")
+
+# diccionario deptos
+dicc_deptos <- read_csv("https://cdn.produccion.gob.ar/cdn-cep/datos-por-departamento/diccionario_cod_depto.csv")
+
+data_deptos_ARG <- read_sf("data/departamentos_arg.geojson")
+
+```
+
+```{r preparación de datos}
+# vamos a observar únicamente el año 2021
+salarios_2021 <- salario_prom_depto %>% 
+  # year es una función de lubridate
+  filter(year(fecha)==2021)
+
+
+# filtramos los casos -99 y nos quedamos con el mes de diciembre
+salarios_dic_2021 <- salarios_2021 %>% 
+  filter(w_mean > 0, fecha == "2021-12-01")
+
+
+caba_fix <- data_deptos_ARG %>%
+  select(departamen, provincia, geometry, codigo_departamento_indec) %>%
+  group_by(provincia) %>%
+  filter(provincia == "Ciudad Autónoma de Buenos Aires") %>%
+  summarize(geometry = st_union(geometry),
+            codigo_departamento_indec = "02000") %>%
+  ungroup() %>% 
+  mutate(geometry = st_combine(geometry))
+
+sin_CABA <- filter(data_deptos_ARG, provincia != "Ciudad Autónoma de Buenos Aires")
+
+# el "nuevo" dataset pero con id 2000 para CABA
+data_deptos_ARG <- sin_CABA %>%
+  bind_rows(caba_fix) 
+```
+
+```{r salario x depto}
+# corregimos el tipo 
+data_deptos_ARG <- data_deptos_ARG %>% 
+  mutate(codigo_departamento_indec = as.numeric(codigo_departamento_indec))
+
+# agregamos la información de salarios para cada depto
+deptos_salario_dic_2021 <- data_deptos_ARG %>% 
+  left_join(salarios_dic_2021)
+
+```
+
+La visualización más simple que podemos obtener de la distribución de salarios promedios es la siguiente:
+
+```{r gráfica - primer, fig.width= 6, fig.height = 10}
+
+# graficamos
+ggplot(deptos_salario_dic_2021) +
+  geom_sf(aes(fill = w_mean)) +
+  labs(fill = "Salario promedio") +
+  # usamos la paleta de colores viridis cuya principal
+  # característica es la accesibilidad
+  scale_fill_viridis_c(option = "viridis") +
+  theme_void() +
+  theme(
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 13)
+  )
+
+```
+
+Como se puede observar en la leyenda, el salario promedio no muestra el punto separador de miles. Por otra parte podriamos detallar el tipo de unidad que estamos trabajando, es decir, el signo peso (\$). Nuestra tarea será mejorar estos aspectos, para lo cual haremos uso de una libreria que fué pensada para trabajar con el reescalado de datos.
+
+Pero... ¿Qué significa esto del "reescalado" de datos?.
+
+::: callout-note
+En el [post](https://illak-blog.netlify.app/posts/analisis-salario-arg/){target="_blank"} que introduce los datos utilizados y en donde realizamos un análisis exploratorio de los mismos, no escribí sobre la utilidad de la libreria `scales`. A continuación voy a desarrollar sobre el uso de esta librería, para un caso puntual.
+:::
+
+Puede ser que estemos trabajando con ciertos valores que estén en una determinada escala. Tomemos como ejemplo las proporciones. Supongamos que luego de nuestro análisis hemos obtenido una tabla como la siguiente:
+
+```{r}
+tabla <- data.frame(
+  tipo = c("T1","T2","T3"),
+  n = c(200,100,100),
+  pct = c(.5,.25,.25)
+)
+
+tabla
+```
+
+En la cual hemos calculado las proporciones con respecto al total (400) para cada tipo.
+
+*"Del total de casos (400), 200 son de tipo T1, 100 de tipo T2 y 100 de tipo T3".*
+
+Dicho de otra forma, el 50% de casos son de tipo T1, el 25% de tipo T2 y el 25% restante de tipo T3. Ahora bien, al momento de graficar estos datos, podríamos hacer algo como esto:
+
+```{r}
+tabla %>% 
+  ggplot(aes(x = tipo, y = pct)) +
+  geom_col()
+```
+
+Pero si usamos estos valores, al lector le será dificil interpretar que nuestro objetivo era mostrar porcentajes en el eje Y. En lugar de 0.5, lo ideal sería mostrar 50%. Lo mismo sucede con nuestro ejemplo principal de este post, es decir, los valores de salario promedio. No es lo mismo mostrar *350000* que *\$350.000* Al lector le será más fácil identificar la unidad con que se está trabajando y el separador de miles. Recordemos que nuestro objetivo será que la visualización de datos no confunda, sino que debe facilitar la comprensión.
+
+Luego de haber hecho esta breve y simple justificación de la importancia del reescalado, veamos cómo se usa la libreria `scales` para transformar escalas y además "mostrarlas" en nuestras gráficas. Es tan sencillo como agregar lo siguiente:
+
+```{r}
+tabla %>% 
+  ggplot(aes(x = tipo, y = pct)) +
+  geom_col() +
+  # modificamos la escala de Y indicando que
+  # las etiquetas sean valores porcentuales
+  scale_y_continuous(labels = scales::label_percent())
+```
+
+Ahora corrijamos nuestra leyenda del mapa haciendo uso de la función de `label_dollar()` de `scales`.
+
+```{r gráfica - segundo, fig.width= 6, fig.height = 10}
+
+
+# graficamos
+ggplot(deptos_salario_dic_2021) +
+  geom_sf(aes(fill = w_mean)) +
+  labs(fill = "Salario promedio") +
+  # usamos la paleta de colores viridis cuya principal
+  # característica es la accesibilidad
+  # además, ahora modificamos las etiquetas
+  scale_fill_viridis_c(option = "viridis",
+                       labels = scales::label_dollar()) +
+  theme_void() +
+  theme(
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 13)
+  )
+```
+
+Perfecto! pero hay un detalle... nosotros separamos miles usando punto y no coma. Por defecto la función usa la coma para separar miles. Vamos a hacer unos ajustes a la función para modificar este comportamiento.
+
+```{r gráfica - tercero, fig.width= 6, fig.height = 10}
+
+
+# graficamos
+ggplot(deptos_salario_dic_2021) +
+  geom_sf(aes(fill = w_mean)) +
+  labs(fill = "Salario promedio") +
+  # usamos la paleta de colores viridis cuya principal
+  # característica es la accesibilidad
+  # además, ahora modificamos las etiquetas
+  # y modificamos el comportamiento por defecto de
+  # la función indicando separadores de miles
+  # y decimales
+  scale_fill_viridis_c(option = "viridis",
+                       labels = scales::label_dollar(
+                         big.mark = ".",
+                         decimal.mark = ","
+                       )) +
+  theme_void() +
+  theme(
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 13)
+  )
+```
+
+# Agregando interactividad al mapa
+
+Bien, volvamos a nuestro objetivo inicial... generar un mapa interactivo. Vamos a ver que generar un mapa de este tipo resulta demasiado sencillo. Y es que simplemente, a nuestro flujo de trabajo inicial, el que utilizamos para generar el mapa estático, debemos sumarle la función `ggplotly()` y listo! tenemos un mapa interactivo. A esta función le pasamos el parámetro `tooltip`, el cual indica qué *aesthetic* mostrar cuándo pasemos el puntero por encima de las regiones del mapa. En nuestro caso vamos a mostrar un texto que combina el dato del nombre de la *provincia*, el *departamento* y el *salario promedio*.
+
+```{r mapa interactivo, fig.width= 6, fig.height = 10}
+
+etiquetadora <- scales::label_dollar(
+                         big.mark = ".",
+                         decimal.mark = ","
+                       )
+
+deptos_salario_dic_2021 <- deptos_salario_dic_2021 %>% 
+  mutate(
+    salario = etiquetadora(w_mean),
+    tooltip = paste0(provincia,"\n",departamen,"\n",salario))
+
+# graficamos
+mapa_plot <- ggplot(deptos_salario_dic_2021, aes(text = tooltip)) +
+  geom_sf(aes(fill = w_mean)) +
+  labs(fill = "Salario promedio") +
+  # usamos la paleta de colores viridis cuya principal
+  # característica es la accesibilidad
+  # además, ahora modificamos las etiquetas
+  # y modificamos el comportamiento por defecto de
+  # la función indicando separadores de miles
+  # y decimales
+  scale_fill_viridis_c(option = "viridis",
+                       labels = scales::label_dollar(
+                         big.mark = ".",
+                         decimal.mark = ","
+                       )) +
+  theme_void() +
+  theme(
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 13)
+  )
+
+
+# la "magia" de ggplotly 🧙‍♂️
+ggplotly(
+  mapa_plot,
+  tooltip = "text"
+) %>% 
+  style(
+    hoveron = "fill"
+  )
+```
+
+Un dato de interés, es el uso de `style`, que nos permite agregar algunas propiedades visuales. En este caso usaremos la propiedad `hoveron`.
+
+Esto es para evitar cierto comportamiento extraño al pasar el puntero por encima de un departamento. Te propongo visualizar tal comportamiento quitando la función style.
