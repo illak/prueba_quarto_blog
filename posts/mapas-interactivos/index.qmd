@@ -4,6 +4,7 @@ lang: es
 author: "Zapata Illak"
 date: "2022-09-17"
 categories: [análisis, R, código, plotly, interactivo]
+image: "mapa_plotly.png"
 language: 
   title-block-author-single: "Autor"
   title-block-published: "Fecha"
