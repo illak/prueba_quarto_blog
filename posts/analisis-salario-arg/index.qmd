@@ -4,7 +4,7 @@ lang: es
 author: "Zapata Illak"
 date: "2022-07-29"
 categories: [análisis, R, código]
-image: "mapa.png"
+image: "mapa2.png"
 language: 
   title-block-author-single: "Autor"
   title-block-published: "Fecha"
