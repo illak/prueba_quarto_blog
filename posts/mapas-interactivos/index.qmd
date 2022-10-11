@@ -205,8 +205,13 @@ deptos_salario_dic_2021 <- deptos_salario_dic_2021 %>%
     tooltip = paste0(provincia,"\n",departamen,"\n",salario))
 
 # graficamos
-mapa_plot <- ggplot(deptos_salario_dic_2021, aes(text = tooltip)) +
-  geom_sf(aes(fill = w_mean)) +
+# lo de TRUCO sale del siguiente issue
+# https://github.com/plotly/plotly.R/issues/1641#issuecomment-550477069
+mapa_plot <- ggplot(deptos_salario_dic_2021, 
+                    aes(fill = w_mean, 
+                        text = tooltip, 
+                        color = tooltip)) +
+  geom_sf() +
   labs(fill = "Salario promedio") +
   # usamos la paleta de colores viridis cuya principal
   # característica es la accesibilidad
@@ -219,6 +224,7 @@ mapa_plot <- ggplot(deptos_salario_dic_2021, aes(text = tooltip)) +
                          big.mark = ".",
                          decimal.mark = ","
                        )) +
+  guides(color = "none") +
   theme_void() +
   theme(
     legend.text = element_text(size = 12),
@@ -227,15 +233,22 @@ mapa_plot <- ggplot(deptos_salario_dic_2021, aes(text = tooltip)) +
 
 
 # la "magia" de ggplotly 🧙‍♂️
-ggplotly(
+gg_2 <- ggplotly(
   mapa_plot,
   tooltip = "text"
-) %>% 
+) 
+
+gg_2 %>% 
   style(
-    hoveron = "fill"
-  )
+    hoveron = "fill",
+    # override the color mapping
+    line.color = toRGB("gray40"),
+    # don't apply these style rules to the first trace, which is the background graticule/grid
+    traces = seq.int(2, length(gg_2$x$data))
+  ) %>% 
+  hide_legend()
 ```
 
 Un dato de interés, es el uso de `style`, que nos permite agregar algunas propiedades visuales. En este caso usaremos la propiedad `hoveron`.
 
-Esto es para evitar cierto comportamiento extraño al pasar el puntero por encima de un departamento. Te propongo visualizar tal comportamiento quitando la función style.
+Esto es para evitar cierto comportamiento extraño al pasar el puntero por encima de un departamento. Te propongo visualizar tal comportamiento quitando la función `style` (y todo lo que sigue, que [son "hacks" para corregir el texto del tooltip](https://github.com/plotly/plotly.R/issues/1641){target="_blank"} en este tipo de mapas).
