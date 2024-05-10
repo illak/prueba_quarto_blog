@@ -153,10 +153,11 @@ gtag('config', 'G-X9HYS83D1C', { 'anonymize_ip': true});
     <div class="quarto-title column-body">
       <h1 class="title">Producción de tablas en R (libreria GT)</h1>
                                 <div class="quarto-categories">
-                <div class="quarto-category">análisis</div>
                 <div class="quarto-category">R</div>
                 <div class="quarto-category">código</div>
                 <div class="quarto-category">visualización</div>
+                <div class="quarto-category">tablas</div>
+                <div class="quarto-category">gt</div>
               </div>
                   </div>
   </div>
@@ -204,24 +205,25 @@ gtag('config', 'G-X9HYS83D1C', { 'anonymize_ip': true});
 
 
 
+<p>En este post veremos un paso a paso de cómo generar una tabla “con estilo” ✨ usando las librerias <code>gt</code> y <code>gtExtra</code>. Esta tabla la diseñé para una infografía que resumen y muestra datos del sistema educativo en Córdoba Capital en el 2023 y acompaña a otras visualizaciones que no se verán en esta mini guía.</p>
 <section id="librerias-utilizadas" class="level2">
 <h2 class="anchored" data-anchor-id="librerias-utilizadas">Librerias utilizadas</h2>
-<p>Cargamos las librerias necesarias, en este caso usaremos solamente las siguientes 3</p>
+<p>Cargamos las librerias necesarias, en este caso usaremos solamente las siguientes:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gtExtras)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ul>
-<li><code>tidyverse</code> para la manipulación de datos</li>
-<li><code>gt</code> para la creación de tablas con estilo</li>
-<li><code>gtExtras</code> que agrega funciones <em>helpers</em> que básicamente brindan soporte sobre <code>gt</code></li>
+<li><a href="https://www.tidyverse.org/">tidyverse</a> para la manipulación de datos</li>
+<li><a href="https://gt.rstudio.com/">gt</a> para la creación de tablas con estilo</li>
+<li><a href="https://jthomasmock.github.io/gtExtras/">gtExtras</a> que agrega funciones <em>helpers</em> que básicamente brindan soporte sobre <code>gt</code></li>
 </ul>
 </section>
 <section id="datos" class="level2">
 <h2 class="anchored" data-anchor-id="datos">Datos</h2>
-<p>Usaremos datos provenientes del relevamiento anual para establecimientos educativos de la provincia de Córdoba, procesados y disponibles para descargar en <code>.csv</code>:</p>
-<p><a href="#dnldts22528" onclick="fetch('data:text/csv;base64,TW9kYWxpZGFkLE5pdmVsLFVFX1RvdGFsLFVFX0VzdGF0YWwsVUVfUHJpdmFkbyxBTFVNX1RvdGFsLEFMVU1fRXN0YXRhbCxBTFVNX1ByaXZhZG8sUERfVG90YWwsUERfRXN0YXRhbCxQRF9Qcml2YWRvDQpDb23Dum4sSW5pY2lhbCwxNzU3LDE0NDQsMzEzLDEzMjM0Miw5NjYzMSwzNTcxMSwxMDUxMiw2NzY4LDM3NDQNCkNvbcO6bixQcmltYXJpbywyMDQyLDE3MjQsMzE4LDM1NDM2MCwyNTYxNTAsOTgyMTAsMzE0MjAsMjM1NDQsNzg3Ng0KQ29tw7puLFNlY3VuZGFyaW8sOTMyLDUxNyw0MTUsMzQ2NzA1LDIwODYwMywxMzgxMDIsNjAxMzMsNDA0MTUsMTk3MTgNCkNvbcO6bixTdXBlcmlvciwyMDcsODMsMTI0LDc2NzM2LDQ1MDE0LDMxNzIyLDEwMTU5LDU1MjUsNDYzNA0KRXNwZWNpYWwsVG9kb3MgbG9zIG5pdmVsZXMsMTAxLDYwLDQxLDUwMTksMjc2NSwyMjU0LDI3NjQsMTgyNyw5MzcNCkhvc3BpdGFsYXJpYSB5IERvbWljaWxpYXJpYSxUb2RvcyBsb3Mgbml2ZWxlcywzLDIsMSwzOTYsMzg2LDEwLDExMSwxMDAsMTENCkrDs3ZlbmVzIHkgQWR1bHRvcyxQcmltYXJpbywxNzgsMTc3LDEsNDU2MCw0NTQzLDE3LDQ2Niw0NjQsMg0KSsOzdmVuZXMgeSBBZHVsdG9zLFNlY3VuZGFyaW8sMTM2LDExMSwyNSwzODMzMiwzMzQyNSw0OTA3LDczODUsNjkzNiw0NDkNCkFydMOtc3RpY2EsLDMzLDI4LDUsOTcwMCw4NjU5LDEwNDEsNTk0LDUxMCw4NA0KRm9ybWFjacOzbiBQcm9mZXNpb25hbCwsODMsODMsMCwzMjYyMywzMjYyMywwLDY0MSw2NDEsMA==').then(res => res.blob()).then(blob => {
+<p>Usaremos datos provenientes del relevamiento anual para establecimientos educativos de la provincia de Córdoba, procesados previamente (por mí) y disponibles para descargar en <code>.csv</code>:</p>
+<p><a href="#dnldts46484" onclick="fetch('data:text/csv;base64,TW9kYWxpZGFkLE5pdmVsLFVFX1RvdGFsLFVFX0VzdGF0YWwsVUVfUHJpdmFkbyxBTFVNX1RvdGFsLEFMVU1fRXN0YXRhbCxBTFVNX1ByaXZhZG8sUERfVG90YWwsUERfRXN0YXRhbCxQRF9Qcml2YWRvDQpDb23Dum4sSW5pY2lhbCwxNzU3LDE0NDQsMzEzLDEzMjM0Miw5NjYzMSwzNTcxMSwxMDUxMiw2NzY4LDM3NDQNCkNvbcO6bixQcmltYXJpbywyMDQyLDE3MjQsMzE4LDM1NDM2MCwyNTYxNTAsOTgyMTAsMzE0MjAsMjM1NDQsNzg3Ng0KQ29tw7puLFNlY3VuZGFyaW8sOTMyLDUxNyw0MTUsMzQ2NzA1LDIwODYwMywxMzgxMDIsNjAxMzMsNDA0MTUsMTk3MTgNCkNvbcO6bixTdXBlcmlvciwyMDcsODMsMTI0LDc2NzM2LDQ1MDE0LDMxNzIyLDEwMTU5LDU1MjUsNDYzNA0KRXNwZWNpYWwsVG9kb3MgbG9zIG5pdmVsZXMsMTAxLDYwLDQxLDUwMTksMjc2NSwyMjU0LDI3NjQsMTgyNyw5MzcNCkhvc3BpdGFsYXJpYSB5IERvbWljaWxpYXJpYSxUb2RvcyBsb3Mgbml2ZWxlcywzLDIsMSwzOTYsMzg2LDEwLDExMSwxMDAsMTENCkrDs3ZlbmVzIHkgQWR1bHRvcyxQcmltYXJpbywxNzgsMTc3LDEsNDU2MCw0NTQzLDE3LDQ2Niw0NjQsMg0KSsOzdmVuZXMgeSBBZHVsdG9zLFNlY3VuZGFyaW8sMTM2LDExMSwyNSwzODMzMiwzMzQyNSw0OTA3LDczODUsNjkzNiw0NDkNCkFydMOtc3RpY2EsLDMzLDI4LDUsOTcwMCw4NjU5LDEwNDEsNTk0LDUxMCw4NA0KRm9ybWFjacOzbiBQcm9mZXNpb25hbCwsODMsODMsMCwzMjYyMywzMjYyMywwLDY0MSw2NDEsMA==').then(res => res.blob()).then(blob => {
       const downloadURL = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       document.body.appendChild(a);
@@ -229,7 +231,7 @@ gtag('config', 'G-X9HYS83D1C', { 'anonymize_ip': true});
       a.download = 'file.csv'; a.click();
       window.URL.revokeObjectURL(downloadURL);
       document.body.removeChild(a);
-        });"><button class="btn btn-info downloadthis  " id="dnldts22528"><i class="bi bi-database-fill-down"></i> Descargar datos </button></a></p>
+        });"><button class="btn btn-info downloadthis  " id="dnldts46484"><i class="bi bi-database-fill-down"></i> Descargar datos </button></a></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/datos_se_2023.csv"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -268,7 +270,7 @@ gtag('config', 'G-X9HYS83D1C', { 'anonymize_ip': true});
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>div_total_pct_text <span class="ot">&lt;-</span> <span class="st">"&lt;div style='line-height:21px'&gt;"</span></span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>El primer paso será agregar algunas columnas</p>
+<p>El primer paso será agregar algunas columnas, limpiar o corregir otras:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>tabla1 <span class="ot">&lt;-</span> data  <span class="sc">|&gt;</span> </span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Nivel =</span> <span class="fu">case_when</span>(</span>
@@ -954,7 +956,7 @@ gtag('config', 'G-X9HYS83D1C', { 'anonymize_ip': true});
 </div>
 </div>
 </div>
-<p>Agregamos un tema predefinido</p>
+<p>Agregamos un tema predefinido a la tabla, en este caso el famoso <a href="http://fivethirtyeight.com/"><em>FiveThirtyEight</em></a>. Este tema servirá como base.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>tabla2 <span class="ot">&lt;-</span> tabla1 <span class="sc">|&gt;</span> </span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt_theme_538</span>()</span>
@@ -1610,6 +1612,7 @@ tbody tr:last-child {
 </div>
 </div>
 </div>
+<p>Ahora agregaremos las columnas que tienen la barra porcentual indicando la distribución de totales por tipo de gestión (estatal o privada). Cabe destacar que utilizaremos un <strong>esquema de colores</strong> que permita diferenciar cada dimensión: <span style="color:#5e2a72;"><strong>Unidades Educativas</strong></span>, <span style="color:#d5676d;"><strong>Alumnos</strong></span> y <span style="color:#4f91b4;"><strong>Personal Docente</strong></span>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tabla3 <span class="ot">&lt;-</span> tabla2 <span class="sc">|&gt;</span> </span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Creamos barras de porcentaje</span></span>
@@ -2256,7 +2259,7 @@ tbody tr:last-child {
 </div>
 </div>
 </div>
-<p>Agregamos los <em>spanners</em> o agrupaciones de columnas</p>
+<p>Además de los colores, agregaremos los <em>spanners</em> o agrupaciones de columnas que permitirán identificar rápidamente los datos que pertenecen a cada dimensión:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>tabla4_spanner <span class="ot">&lt;-</span> tabla3 <span class="sc">|&gt;</span> </span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Conf. Spanner para Instituciones</span></span>
@@ -2938,7 +2941,7 @@ tbody tr:last-child {
 </div>
 </div>
 </div>
-<p>Ocultamos algunos encabezados de columna y le cambiamos el nombre a otras</p>
+<p>Ocultamos algunos encabezados de columna y le cambiamos el nombre a otras:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>tabla5 <span class="ot">&lt;-</span> tabla4_spanner <span class="sc">|&gt;</span> </span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Cambiamos la "etiqueta" de algunas columnas</span></span>
@@ -3615,7 +3618,7 @@ tbody tr:last-child {
 </div>
 </div>
 </div>
-<p>Agregamos un “mapa de calor” para las columnas de totales</p>
+<p>Agregamos un “mapa de calor” para las columnas de totales de cada dimensión:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>tabla6 <span class="ot">&lt;-</span> tabla5 <span class="sc">|&gt;</span> </span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  </span>
@@ -4304,7 +4307,7 @@ tbody tr:last-child {
 </div>
 </div>
 </div>
-<p>Agregamos estilo</p>
+<p>Agregamos algo de estilo:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>tabla7 <span class="ot">&lt;-</span> tabla6 <span class="sc">|&gt;</span> </span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Agregamos algo de estilo</span></span>
@@ -5055,7 +5058,7 @@ tbody tr:last-child {
 </div>
 </div>
 </div>
-<p>Le damos formato a las columnas correspondientes</p>
+<p>Le damos formato a las columnas correspondientes:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>tabla8 <span class="ot">&lt;-</span> tabla7 <span class="sc">|&gt;</span> </span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fmt</span>(<span class="at">columns =</span> <span class="fu">c</span>(UE_Total,</span>
@@ -5786,7 +5789,7 @@ tbody tr:last-child {
 </div>
 </div>
 </div>
-<p>Finalmente agregamos unas opciones globales</p>
+<p>Finalmente agregamos unas opciones globales:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>tabla9 <span class="ot">&lt;-</span> tabla8 <span class="sc">|&gt;</span> </span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Opciones finales (globales)</span></span>
@@ -5800,7 +5803,7 @@ tbody tr:last-child {
 <span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>y… voilà!, tenemos nuestra tabla finalizada</p>
+<p>y… voilà 👌!, tenemos nuestra tabla finalizada!</p>
 <div class="column-page">
 <p><img src="output/tabla_final.png" class="img-fluid"></p>
 </div>

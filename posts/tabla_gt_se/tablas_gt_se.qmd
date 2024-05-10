@@ -3,8 +3,8 @@ title: "Producción de tablas en R (libreria GT)"
 lang: es
 author: "Illak Zapata"
 date: "2024-05-10"
-categories: [análisis, R, código, visualización]
-image: ""
+categories: [R, código, visualización, tablas, gt]
+image: "imgs/table_capture.png"
 language: 
   title-block-author-single: "Autor"
   title-block-published: "Fecha"
@@ -18,9 +18,14 @@ toc: true
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
+En este post veremos un paso a paso de cómo generar una tabla "con estilo" ✨
+usando las librerias `gt` y `gtExtra`. Esta tabla la diseñé para una infografía
+que resumen y muestra datos del sistema educativo en Córdoba Capital en el 2023
+y acompaña a otras visualizaciones que no se verán en esta mini guía.
+
 ## Librerias utilizadas
 
-Cargamos las librerias necesarias, en este caso usaremos solamente las siguientes 3
+Cargamos las librerias necesarias, en este caso usaremos solamente las siguientes:
 
 ```{r carga de librerias}
 library(tidyverse)
@@ -29,15 +34,15 @@ library(gtExtras)
 
 ```
 
--   `tidyverse` para la manipulación de datos
--   `gt` para la creación de tablas con estilo
--   `gtExtras` que agrega funciones *helpers* que básicamente brindan soporte sobre `gt`
+-   [tidyverse](https://www.tidyverse.org/) para la manipulación de datos
+-   [gt](https://gt.rstudio.com/) para la creación de tablas con estilo
+-   [gtExtras](https://jthomasmock.github.io/gtExtras/) que agrega funciones *helpers* que básicamente brindan soporte sobre `gt`
 
 ## Datos
 
 Usaremos datos provenientes del relevamiento anual para establecimientos
-educativos de la provincia de Córdoba, procesados y disponibles para
-descargar en `.csv`:
+educativos de la provincia de Córdoba, procesados previamente (por mí) 
+y disponibles para descargar en `.csv`:
 
 {{< downloadthis data/datos_se_2023.csv label="Descargar datos"  icon="database-fill-down" type="info">}}
 
@@ -113,7 +118,8 @@ tabla1 <- data  |>
 tabla1
 ```
 
-Agregamos un tema predefinido, en este caso el famoso [*FiveThirtyEight*](http://fivethirtyeight.com/).
+
+Agregamos un tema predefinido a la tabla, en este caso el famoso [*FiveThirtyEight*](http://fivethirtyeight.com/).
 Este tema servirá como base.
 
 ```{r}
@@ -122,7 +128,11 @@ tabla2 <- tabla1 |>
 
 tabla2
 ```
-Ahora agraremos las col
+
+Ahora agregaremos las columnas que tienen la barra porcentual indicando la 
+distribución de totales por tipo de gestión (estatal o privada). Cabe destacar
+que utilizaremos un **esquema de colores** que permita diferenciar cada dimensión:
+<span style="color:#5e2a72;">**Unidades Educativas**</span>, <span style="color:#d5676d;">**Alumnos**</span> y <span style="color:#4f91b4;">**Personal Docente**</span>.
 
 ```{r}
 tabla3 <- tabla2 |> 
@@ -139,7 +149,8 @@ tabla3 <- tabla2 |>
 tabla3
 ```
 
-Agregamos los *spanners* o agrupaciones de columnas
+Además de los colores, agregaremos los *spanners* o agrupaciones de columnas 
+que permitirán identificar rápidamente los datos que pertenecen a cada dimensión:
 
 ```{r}
 
@@ -181,7 +192,7 @@ tabla4_spanner <- tabla3 |>
 tabla4_spanner
 ```
 
-Ocultamos algunos encabezados de columna y le cambiamos el nombre a otras
+Ocultamos algunos encabezados de columna y le cambiamos el nombre a otras:
 
 ```{r}
 tabla5 <- tabla4_spanner |> 
@@ -211,7 +222,7 @@ tabla5 <- tabla4_spanner |>
 tabla5
 ```
 
-Agregamos un "mapa de calor" para las columnas de totales
+Agregamos un "mapa de calor" para las columnas de totales de cada dimensión:
 
 ```{r}
 tabla6 <- tabla5 |> 
@@ -253,7 +264,7 @@ tabla6 <- tabla5 |>
 tabla6
 ```
 
-Agregamos estilo
+Agregamos algo de estilo:
 
 ```{r}
 tabla7 <- tabla6 |> 
@@ -357,7 +368,7 @@ tabla7 <- tabla6 |>
 tabla7
 ```
 
-Le damos formato a las columnas correspondientes
+Le damos formato a las columnas correspondientes:
 
 ```{r}
 tabla8 <- tabla7 |> 
@@ -378,7 +389,7 @@ tabla8 <- tabla7 |>
 tabla8
 ```
 
-Finalmente agregamos unas opciones globales
+Finalmente agregamos unas opciones globales:
 
 ```{r}
 tabla9 <- tabla8 |> 
@@ -395,7 +406,7 @@ tabla9 <- tabla8 |>
 
 ```
 
-y... voilà!, tenemos nuestra tabla finalizada
+y... voilà 👌!, tenemos nuestra tabla finalizada!
 
 ::: column-page
 ![](output/tabla_final.png)
