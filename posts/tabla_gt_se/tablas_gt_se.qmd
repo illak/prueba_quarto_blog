@@ -1,0 +1,671 @@
+---
+title: "Producción de tablas en R (libreria GT)"
+lang: es
+author: "Illak Zapata"
+date: "2024-05-10"
+categories: [análisis, R, código, visualización]
+image: ""
+language: 
+  title-block-author-single: "Autor"
+  title-block-published: "Fecha"
+knitr:
+  opts_chunk:
+    out.width: "60%"
+toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+## Librerias utilizadas
+
+Cargamos las librerias necesarias, en este caso usaremos solamente las siguientes 3
+
+```{r carga de librerias}
+library(tidyverse)
+library(gt)
+library(gtExtras)
+
+```
+
+-   `tidyverse` para la manipulación de datos
+-   `gt` para la creación de tablas con estilo
+-   `gtExtras` que agrega funciones *helpers* que básicamente brindan soporte sobre `gt`
+
+## Datos
+
+Usaremos datos provenientes del relevamiento anual para establecimientos
+educativos de la provincia de Córdoba, procesados y disponibles para
+descargar en `.csv`:
+
+{{< downloadthis data/datos_se_2023.csv label="Descargar datos"  icon="database-fill-down" type="info">}}
+
+
+```{r carga de datos}
+data <- read_csv("data/datos_se_2023.csv")
+
+data
+```
+
+## Objetivo 
+
+El objetivo será generar la siguiente tabla
+
+::: column-page
+![](output/tabla_final.png)
+:::
+
+## Construcción de tabla
+
+Antes de arrancar vamos a definir algunos valores constantes.
+
+```{r defino algunos valores constantes}
+img_height <- 32
+
+div_total_pct_text <- "<div style='line-height:21px'>"
+```
+
+El primer paso será agregar algunas columnas, limpiar o corregir otras:
+
+```{r}
+tabla1 <- data  |> 
+  mutate(Nivel = case_when(
+    is.na(Nivel) ~ "",
+    TRUE ~ Nivel
+  ))  |> 
+  mutate(
+    UE_Estatal = as.numeric(UE_Estatal)
+  )  |> 
+  mutate(
+    Modalidad = case_when(
+      Modalidad == "Hospitalaria y Domiciliaria" ~  "Hospitalaria y&nbsp;&nbsp;<br>Domiciliaria",
+      Modalidad == "Jóvenes y Adultos" ~ "Jóvenes y<br>Adultos",
+      Modalidad == "Formación Profesional" ~ "Formación<br>Profesional",
+      TRUE ~ Modalidad
+    )
+  )  |>
+  rowwise()  |> 
+  mutate(
+    #percents_ue = pmap(list(UE_Estatal,UE_Privado,UE_Total), ~c((..1/..3),(..2/..3))),
+    percents_ue = UE_Estatal/UE_Total,
+    percents_ue2 = UE_Privado/UE_Total,
+    UE_Estatal = if_else(UE_Estatal > 0, 
+                         str_c(div_total_pct_text, scales::label_comma(big.mark = ".", accuracy = 1)(UE_Estatal),"<br><i>(",scales::label_percent()(percents_ue),")</i></div>"), ""),
+    UE_Privado = if_else(UE_Privado > 0, str_c(div_total_pct_text, scales::label_comma(big.mark = ".", accuracy = 1)(UE_Privado),"<br><i>(",scales::label_percent()(percents_ue2),")</i></div>"), ""),
+    #percents_alu = pmap(list(ALUM_Estatal,ALUM_Privado,ALUM_Total), ~c((..1/..3),(..2/..3))),
+    percents_alu = ALUM_Estatal/ALUM_Total,
+    percents_alu2 = ALUM_Privado/ALUM_Total,
+    ALUM_Estatal = if_else(ALUM_Estatal > 0, 
+                           str_c(div_total_pct_text, scales::label_comma(big.mark = ".", accuracy = 1)(ALUM_Estatal),"<br><i>(",scales::label_percent()(percents_alu),")</i></div>"), ""),
+    ALUM_Privado = if_else(ALUM_Privado > 0, 
+                           str_c(div_total_pct_text, scales::label_comma(big.mark = ".", accuracy = 1)(ALUM_Privado),"<br><i>(",scales::label_percent()(percents_alu2),")</i></div>"), ""),
+    #percents_pd = pmap(list(PD_Estatal,PD_Privado,PD_Total), ~c((..1/..3),(..2/..3)))
+    percents_pd = PD_Estatal/PD_Total,
+    percents_pd2 = PD_Privado/PD_Total,
+    PD_Estatal = if_else(PD_Estatal > 0, 
+                         str_c(div_total_pct_text, scales::label_comma(big.mark = ".", accuracy = 1)(PD_Estatal),"<br><i>(",scales::label_percent()(percents_pd),")</i></div>"), ""),
+    PD_Privado = if_else(PD_Privado > 0, 
+                         str_c(div_total_pct_text, scales::label_comma(big.mark = ".", accuracy = 1)(PD_Privado),"<br><i>(",scales::label_percent()(percents_pd2),")</i></div>"), "")
+  )  |> 
+  gt(id = "tabla") 
+
+tabla1
+```
+
+Agregamos un tema predefinido, en este caso el famoso [*FiveThirtyEight*](http://fivethirtyeight.com/).
+Este tema servirá como base.
+
+```{r}
+tabla2 <- tabla1 |> 
+  gt_theme_538()
+
+tabla2
+```
+Ahora agraremos las col
+
+```{r}
+tabla3 <- tabla2 |> 
+  # Creamos barras de porcentaje
+  gt_plt_bar_pct(column = percents_ue, fill = "#5e2a72", background = "#B0AEB0")  |>
+  gt_plt_bar_pct(column = percents_alu, fill = "#d5676d", background = "#B0AEB0")  |>
+  gt_plt_bar_pct(column = percents_pd, fill = "#4f91b4", background = "#B0AEB0")  |>
+  
+  # Ocultamos algunas columnas
+  cols_hide(
+    columns = c(percents_ue2, percents_alu2, percents_pd2)
+  )  
+
+tabla3
+```
+
+Agregamos los *spanners* o agrupaciones de columnas
+
+```{r}
+
+tabla4_spanner <- tabla3 |> 
+  # Conf. Spanner para Instituciones
+  tab_spanner(
+    label = md(
+      paste(
+        local_image("imgs/school-building-with-flag-svgrepo-com.svg", height = img_height),
+        "<div style='line-height:25px'><span style='font-weight:bold;font-variant:small-caps;font-size:19px'>Unidades educativas</div>"
+        )
+      ),
+    columns = c("UE_Total","UE_Estatal","percents_ue","UE_Privado"),
+    id = "ue"
+  )  |> 
+  # Conf. Spanner para Alumnos
+  tab_spanner(
+    label = md(
+      paste(
+        local_image("imgs/student-svgrepo-com.svg", height = img_height),
+        "<div style='line-height:25px'><span style='font-weight:bold;font-variant:small-caps;font-size:19px'>Alumnos</div>"
+      )
+    ),
+    columns = c("ALUM_Total","ALUM_Estatal","percents_alu","ALUM_Privado"),
+    id = "alumnos"
+  )  |> 
+  # Conf. Spanner para Personal Docente
+  tab_spanner(
+    label = md(
+      paste(
+        local_image("imgs/teacher-svgrepo-com.svg", height = img_height),
+        "<div style='line-height:25px'><span style='font-weight:bold;font-variant:small-caps;font-size:19px;'>Personal Docente</div>"
+      )
+    ),
+    columns = c("PD_Total","PD_Estatal","percents_pd","PD_Privado"),
+    id = "pd"
+  )
+
+tabla4_spanner
+```
+
+Ocultamos algunos encabezados de columna y le cambiamos el nombre a otras
+
+```{r}
+tabla5 <- tabla4_spanner |> 
+  # Cambiamos la "etiqueta" de algunas columnas
+  cols_label(
+    UE_Estatal="",
+    UE_Privado="",
+    UE_Total="Total",
+    percents_ue = md("<div><span style='font-weight:bold;font-variant:small-caps;font-size:16px;color:#5e2a72;'>Estatales</span>||<span style='font-weight:bold;font-variant:small-caps;font-size:16px;color:grey;'>Privadas</span></div>"),
+    ALUM_Estatal="",
+    ALUM_Privado="",
+    ALUM_Total="Total",
+    percents_alu = md("<div><span style='font-weight:bold;font-variant:small-caps;font-size:16px;color:#d5676d;'>Estatales</span>||<span style='font-weight:bold;font-variant:small-caps;font-size:16px;color:grey;'>Privadas</span></div>"),
+    PD_Estatal="",
+    PD_Privado="",
+    PD_Total="Total",
+    percents_pd = md("<div><span style='font-weight:bold;font-variant:small-caps;font-size:16px;color:#4f91b4;'>Estatales</span>||<span style='font-weight:bold;font-variant:small-caps;font-size:16px;color:grey;'>Privadas</span></div>"),
+  )  |> 
+  
+  sub_missing(
+    columns = c("UE_Estatal","UE_Privado","ALUM_Estatal",
+                "ALUM_Privado", "PD_Estatal", "PD_Privado"),
+    missing_text = ""
+    
+  )
+
+tabla5
+```
+
+Agregamos un "mapa de calor" para las columnas de totales
+
+```{r}
+tabla6 <- tabla5 |> 
+  
+  # Agregamos escala de colores a cada columa de totales
+  # El color varía de acuerdo al valor
+  # Para las Instituciones
+  data_color(
+    columns = c(UE_Total),
+    colors = scales::col_numeric(
+      palette = paletteer::paletteer_dynamic(
+        palette = "cartography::purple.pal",10
+      )  |> as.character(),
+      domain = NULL)
+  )  |> 
+  # Para los Alumnos
+  data_color(
+    columns = c(ALUM_Total),
+    colors = scales::col_numeric(
+      palette = paletteer::paletteer_dynamic(
+        palette = "cartography::wine.pal",10
+      )  |> as.character(),
+      domain = NULL)
+  )  |> 
+  # Para el Personal Docente
+  data_color(
+    columns = c(PD_Total),
+    colors = scales::col_numeric(
+      palette = paletteer::paletteer_dynamic(
+        palette = "cartography::blue.pal",10
+      )  |> as.character(),
+      domain = NULL)
+  )  |> 
+  cols_align(
+    align = "left",
+    columns = c(UE_Privado,ALUM_Privado,PD_Privado)
+  )
+
+tabla6
+```
+
+Agregamos estilo
+
+```{r}
+tabla7 <- tabla6 |> 
+  # Agregamos algo de estilo
+  tab_style(
+    style = list(
+      cell_text(color = "black", weight = "bold", size = "medium")
+    ),
+    locations = cells_column_labels()
+  )  |> 
+  tab_style(
+    style = list(
+      cell_text(color = "black", weight = "bold")
+    ),
+    locations = cells_body(
+      columns = c(Modalidad)
+    )
+  )  |> 
+  tab_style(
+    style = list(
+      cell_text(weight = "bold")
+    ),
+    locations = cells_body(
+      columns = c(UE_Total, ALUM_Total, PD_Total)
+    )
+  )  |> 
+  tab_style(
+    style = list(
+      cell_text(size = "large", weight = "bold", align = "right")
+    ),
+    locations = cells_body(
+      columns = c(UE_Estatal,UE_Privado,ALUM_Estatal,ALUM_Privado,PD_Estatal,PD_Privado)
+    )
+  )  |> 
+  tab_style(
+    style = list(
+      cell_text(color = "#5e2a72")
+    ),
+    locations = cells_body(
+      columns = c(UE_Estatal)
+    )
+  )  |> 
+  tab_style(
+    style = list(
+      cell_text(color = "#d5676d")
+      ),
+      locations = cells_body(
+        columns = c(ALUM_Estatal)
+      )
+    )  |> 
+  tab_style(
+    style = list(
+      cell_text(color = "#4f91b4")
+      ),
+      locations = cells_body(
+        columns = c(PD_Estatal)
+      )
+    )  |> 
+  tab_style(
+    style = list(
+      cell_text(color = "#828182")
+    ),
+    locations = cells_body(
+      columns = c(UE_Privado,ALUM_Privado,PD_Privado)
+    )
+  )  |> 
+  text_transform(
+    locations = cells_body(
+      columns = c(Modalidad),
+      rows = c(2,3,4,8)
+    ),
+    fn = function(x){
+      paste0("")
+    }
+  )  |> 
+  tab_style(
+    style = list(cell_borders(sides = "bottom", color = "grey", weight = px(2))),
+    locations = cells_body(rows = c(4,5,6,8,9))
+  )  |> 
+  tab_style(
+    style = list(cell_borders(sides = "bottom", color = "white")),
+    locations = cells_body(rows = c(1,2,3,7))
+  )  |> 
+  tab_style(
+    style = "padding-right:36px;",
+    locations = cells_body(columns = c(UE_Privado, ALUM_Privado))
+  )  |> 
+  tab_style(
+    style = "padding-left:0px;padding-right:0px;", #AKI
+    locations = cells_body(columns = c(percents_ue, percents_alu, percents_pd))
+  )  |>
+  tab_style(
+    style = "padding-right:36px;line-height:1px;",
+    locations = cells_column_spanners(spanners = c("ue","alumnos","pd"))
+  )  |> 
+  tab_style(
+    style = "padding-right:36px;",
+    locations = cells_column_labels(columns = c())
+  )
+
+tabla7
+```
+
+Le damos formato a las columnas correspondientes
+
+```{r}
+tabla8 <- tabla7 |> 
+  fmt(columns = c(UE_Total,
+                  ALUM_Total,
+                  PD_Total
+                  ), fns = scales::label_comma(big.mark = ".", accuracy = 1))  |>
+  
+  # Esta parte es la que "formatea" el código html!!!
+  fmt_markdown(columns = c(Modalidad,
+                           UE_Estatal,
+                           UE_Privado,
+                           ALUM_Estatal,
+                           ALUM_Privado,
+                           PD_Estatal,
+                           PD_Privado))
+
+tabla8
+```
+
+Finalmente agregamos unas opciones globales
+
+```{r}
+tabla9 <- tabla8 |> 
+    # Opciones finales (globales)
+  tab_options(
+    data_row.padding = px(15),
+    table.font.size = px(22L),
+  ) |> 
+  opt_table_font(
+    font = list(
+      google_font("Roboto Condensed"), "Thin 100"
+    )
+  )
+
+```
+
+y... voilà!, tenemos nuestra tabla finalizada
+
+::: column-page
+![](output/tabla_final.png)
+:::
+
+## Código completo
+
+```{r tabla completa, fig.width=5}
+
+tabla_final <- data  |> 
+  mutate(Nivel = case_when(
+    is.na(Nivel) ~ "",
+    TRUE ~ Nivel
+  ))  |> 
+  mutate(
+    UE_Estatal = as.numeric(UE_Estatal)
+  )  |> 
+  mutate(
+    Modalidad = case_when(
+      Modalidad == "Hospitalaria y Domiciliaria" ~  "Hospitalaria y&nbsp;&nbsp;<br>Domiciliaria",
+      Modalidad == "Jóvenes y Adultos" ~ "Jóvenes y<br>Adultos",
+      Modalidad == "Formación Profesional" ~ "Formación<br>Profesional",
+      TRUE ~ Modalidad
+    )
+  )  |>
+  rowwise()  |> 
+  mutate(
+    #percents_ue = pmap(list(UE_Estatal,UE_Privado,UE_Total), ~c((..1/..3),(..2/..3))),
+    percents_ue = UE_Estatal/UE_Total,
+    percents_ue2 = UE_Privado/UE_Total,
+    UE_Estatal = if_else(UE_Estatal > 0, 
+                         str_c(div_total_pct_text, scales::label_comma(big.mark = ".", accuracy = 1)(UE_Estatal),"<br><i>(",scales::label_percent()(percents_ue),")</i></div>"), ""),
+    UE_Privado = if_else(UE_Privado > 0, str_c(div_total_pct_text, scales::label_comma(big.mark = ".", accuracy = 1)(UE_Privado),"<br><i>(",scales::label_percent()(percents_ue2),")</i></div>"), ""),
+    #percents_alu = pmap(list(ALUM_Estatal,ALUM_Privado,ALUM_Total), ~c((..1/..3),(..2/..3))),
+    percents_alu = ALUM_Estatal/ALUM_Total,
+    percents_alu2 = ALUM_Privado/ALUM_Total,
+    ALUM_Estatal = if_else(ALUM_Estatal > 0, 
+                           str_c(div_total_pct_text, scales::label_comma(big.mark = ".", accuracy = 1)(ALUM_Estatal),"<br><i>(",scales::label_percent()(percents_alu),")</i></div>"), ""),
+    ALUM_Privado = if_else(ALUM_Privado > 0, 
+                           str_c(div_total_pct_text, scales::label_comma(big.mark = ".", accuracy = 1)(ALUM_Privado),"<br><i>(",scales::label_percent()(percents_alu2),")</i></div>"), ""),
+    #percents_pd = pmap(list(PD_Estatal,PD_Privado,PD_Total), ~c((..1/..3),(..2/..3)))
+    percents_pd = PD_Estatal/PD_Total,
+    percents_pd2 = PD_Privado/PD_Total,
+    PD_Estatal = if_else(PD_Estatal > 0, 
+                         str_c(div_total_pct_text, scales::label_comma(big.mark = ".", accuracy = 1)(PD_Estatal),"<br><i>(",scales::label_percent()(percents_pd),")</i></div>"), ""),
+    PD_Privado = if_else(PD_Privado > 0, 
+                         str_c(div_total_pct_text, scales::label_comma(big.mark = ".", accuracy = 1)(PD_Privado),"<br><i>(",scales::label_percent()(percents_pd2),")</i></div>"), "")
+  )  |> 
+  gt(id = "tabla")  |> 
+  gt_theme_538()  |> 
+  # Creamos barras de porcentaje
+  gt_plt_bar_pct(column = percents_ue, fill = "#5e2a72", background = "#B0AEB0")  |>
+  gt_plt_bar_pct(column = percents_alu, fill = "#d5676d", background = "#B0AEB0")  |>
+  gt_plt_bar_pct(column = percents_pd, fill = "#4f91b4", background = "#B0AEB0")  |>
+  
+  # Ocultamos algunas columnas
+  cols_hide(
+    columns = c(percents_ue2, percents_alu2, percents_pd2)
+  )  |>
+  
+  # Conf. Spanner para Instituciones
+  tab_spanner(
+    label = md(
+      paste(
+        local_image("imgs/school-building-with-flag-svgrepo-com.svg", height = img_height),
+        "<div style='line-height:25px'><span style='font-weight:bold;font-variant:small-caps;font-size:19px'>Unidades educativas</div>"
+        )
+      ),
+    columns = c("UE_Total","UE_Estatal","percents_ue","UE_Privado"),
+    id = "ue"
+  )  |> 
+  # Conf. Spanner para Alumnos
+  tab_spanner(
+    label = md(
+      paste(
+        local_image("imgs/student-svgrepo-com.svg", height = img_height),
+        "<div style='line-height:25px'><span style='font-weight:bold;font-variant:small-caps;font-size:19px'>Alumnos</div>"
+      )
+    ),
+    columns = c("ALUM_Total","ALUM_Estatal","percents_alu","ALUM_Privado"),
+    id = "alumnos"
+  )  |> 
+  # Conf. Spanner para Personal Docente
+  tab_spanner(
+    label = md(
+      paste(
+        local_image("imgs/teacher-svgrepo-com.svg", height = img_height),
+        "<div style='line-height:25px'><span style='font-weight:bold;font-variant:small-caps;font-size:19px;'>Personal Docente</div>"
+      )
+    ),
+    columns = c("PD_Total","PD_Estatal","percents_pd","PD_Privado"),
+    id = "pd"
+  )  |> 
+  
+  # Cambiamos la "etiqueta" de algunas columnas
+  cols_label(
+    UE_Estatal="",
+    UE_Privado="",
+    UE_Total="Total",
+    percents_ue = md("<div><span style='font-weight:bold;font-variant:small-caps;font-size:16px;color:#5e2a72;'>Estatales</span>||<span style='font-weight:bold;font-variant:small-caps;font-size:16px;color:grey;'>Privadas</span></div>"),
+    ALUM_Estatal="",
+    ALUM_Privado="",
+    ALUM_Total="Total",
+    percents_alu = md("<div><span style='font-weight:bold;font-variant:small-caps;font-size:16px;color:#d5676d;'>Estatales</span>||<span style='font-weight:bold;font-variant:small-caps;font-size:16px;color:grey;'>Privadas</span></div>"),
+    PD_Estatal="",
+    PD_Privado="",
+    PD_Total="Total",
+    percents_pd = md("<div><span style='font-weight:bold;font-variant:small-caps;font-size:16px;color:#4f91b4;'>Estatales</span>||<span style='font-weight:bold;font-variant:small-caps;font-size:16px;color:grey;'>Privadas</span></div>"),
+  )  |> 
+  
+  sub_missing(
+    columns = c("UE_Estatal","UE_Privado","ALUM_Estatal",
+                "ALUM_Privado", "PD_Estatal", "PD_Privado"),
+    missing_text = ""
+    
+  )  |>
+  
+  # Agregamos escala de colores a cada columa de totales
+  # El color varía de acuerdo al valor
+  # Para las Instituciones
+  data_color(
+    columns = c(UE_Total),
+    colors = scales::col_numeric(
+      palette = paletteer::paletteer_dynamic(
+        palette = "cartography::purple.pal",10
+      )  |> as.character(),
+      domain = NULL)
+  )  |> 
+  # Para los Alumnos
+  data_color(
+    columns = c(ALUM_Total),
+    colors = scales::col_numeric(
+      palette = paletteer::paletteer_dynamic(
+        palette = "cartography::wine.pal",10
+      )  |> as.character(),
+      domain = NULL)
+  )  |> 
+  # Para el Personal Docente
+  data_color(
+    columns = c(PD_Total),
+    colors = scales::col_numeric(
+      palette = paletteer::paletteer_dynamic(
+        palette = "cartography::blue.pal",10
+      )  |> as.character(),
+      domain = NULL)
+  )  |> 
+  cols_align(
+    align = "left",
+    columns = c(UE_Privado,ALUM_Privado,PD_Privado)
+  )  |> 
+  
+  # Agregamos algo de estilo
+  tab_style(
+    style = list(
+      cell_text(color = "black", weight = "bold", size = "medium")
+    ),
+    locations = cells_column_labels()
+  )  |> 
+  tab_style(
+    style = list(
+      cell_text(color = "black", weight = "bold")
+    ),
+    locations = cells_body(
+      columns = c(Modalidad)
+    )
+  )  |> 
+  tab_style(
+    style = list(
+      cell_text(weight = "bold")
+    ),
+    locations = cells_body(
+      columns = c(UE_Total, ALUM_Total, PD_Total)
+    )
+  )  |> 
+  tab_style(
+    style = list(
+      cell_text(size = "large", weight = "bold", align = "right")
+    ),
+    locations = cells_body(
+      columns = c(UE_Estatal,UE_Privado,ALUM_Estatal,ALUM_Privado,PD_Estatal,PD_Privado)
+    )
+  )  |> 
+  tab_style(
+    style = list(
+      cell_text(color = "#5e2a72")
+    ),
+    locations = cells_body(
+      columns = c(UE_Estatal)
+    )
+  )  |> 
+  tab_style(
+    style = list(
+      cell_text(color = "#d5676d")
+      ),
+      locations = cells_body(
+        columns = c(ALUM_Estatal)
+      )
+    )  |> 
+  tab_style(
+    style = list(
+      cell_text(color = "#4f91b4")
+      ),
+      locations = cells_body(
+        columns = c(PD_Estatal)
+      )
+    )  |> 
+  tab_style(
+    style = list(
+      cell_text(color = "#828182")
+    ),
+    locations = cells_body(
+      columns = c(UE_Privado,ALUM_Privado,PD_Privado)
+    )
+  )  |> 
+  text_transform(
+    locations = cells_body(
+      columns = c(Modalidad),
+      rows = c(2,3,4,8)
+    ),
+    fn = function(x){
+      paste0("")
+    }
+  )  |> 
+  tab_style(
+    style = list(cell_borders(sides = "bottom", color = "grey", weight = px(2))),
+    locations = cells_body(rows = c(4,5,6,8,9))
+  )  |> 
+  tab_style(
+    style = list(cell_borders(sides = "bottom", color = "white")),
+    locations = cells_body(rows = c(1,2,3,7))
+  )  |> 
+  tab_style(
+    style = "padding-right:36px;",
+    locations = cells_body(columns = c(UE_Privado, ALUM_Privado))
+  )  |> 
+  tab_style(
+    style = "padding-left:0px;padding-right:0px;", #AKI
+    locations = cells_body(columns = c(percents_ue, percents_alu, percents_pd))
+  )  |>
+  tab_style(
+    style = "padding-right:36px;line-height:1px;",
+    locations = cells_column_spanners(spanners = c("ue","alumnos","pd"))
+  )  |> 
+  tab_style(
+    style = "padding-right:36px;",
+    locations = cells_column_labels(columns = c())
+  )  |> 
+  fmt(columns = c(UE_Total,
+                  ALUM_Total,
+                  PD_Total
+                  ), fns = scales::label_comma(big.mark = ".", accuracy = 1))  |> 
+  fmt_markdown(columns = c(Modalidad,
+                           UE_Estatal,
+                           UE_Privado,
+                           ALUM_Estatal,
+                           ALUM_Privado,
+                           PD_Estatal,
+                           PD_Privado))  |> 
+  tab_options(
+    data_row.padding = px(18),
+    table.font.size = px(22L),
+  ) |> 
+  opt_table_font(
+    font = list(
+      google_font("Roboto Condensed"), "Thin 100"
+    )
+  )
+
+#tabla_final
+gtsave_extra(tabla_final, "output/tabla_final.png", vwidth=1700, vheight=900)
+
+```
+
